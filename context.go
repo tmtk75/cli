@@ -193,7 +193,12 @@ func validateArgs(args string) (*argSpec, error) {
 // Returns the argument value specified with a name.
 // given is false if the value is not given for optionals
 func (c *Context) ArgFor(name string) (arg string, given bool) {
-	a, err := validateArgs(c.Command.Args)
+	args := c.Command.Args
+	if args == "" {
+		args = c.App.Args
+	}
+
+	a, err := validateArgs(args)
 	if err != nil {
 		return "", false
 	}

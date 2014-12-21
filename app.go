@@ -34,6 +34,8 @@ type App struct {
 	Before func(context *Context) error
 	// The action to execute when no subcommands are specified
 	Action func(context *Context)
+	// Args spec
+	Args string
 	// Execute this function if the proper command cannot be found
 	CommandNotFound func(context *Context, command string)
 	// Compilation date
@@ -128,13 +130,16 @@ func (a *App) Run(arguments []string) error {
 		name := args.First()
 		c := a.Command(name)
 		if c != nil {
-			if err := checkArgs(c, context); err != nil {
+			if err := checkArgs(c.Args, c.Name, context); err != nil {
 				return err
 			}
 			return c.Run(context)
 		}
 	}
 
+	if err := checkArgs(a.Args, a.Name, context); err != nil {
+		return err
+	}
 	// Run default Action
 	a.Action(context)
 	return nil
@@ -213,7 +218,7 @@ func (a *App) RunAsSubcommand(ctx *Context) error {
 		name := args.First()
 		c := a.Command(name)
 		if c != nil {
-			if err := checkArgs(c, context); err != nil {
+			if err := checkArgs(c.Args, c.Name, context); err != nil {
 				return err
 			}
 			return c.Run(context)
@@ -230,10 +235,10 @@ func (a *App) RunAsSubcommand(ctx *Context) error {
 	return nil
 }
 
-func checkArgs(c *Command, ctx *Context) error {
-	s, err := validateArgs(c.Args)
+func checkArgs(args, name string, ctx *Context) error {
+	s, err := validateArgs(args)
 	if err != nil {
-		fmt.Println(fmt.Sprintf("Illegal Args. %v (Args: %v)\n", err, c.Args))
+		fmt.Println(fmt.Sprintf("Illegal Args. %v (Args: %v)\n", err, args))
 		return err
 	}
 	l := len(ctx.Args())
@@ -241,7 +246,7 @@ func checkArgs(c *Command, ctx *Context) error {
 		if l > 0 {
 			fmt.Printf("Insufficient Args.\n\n")
 		}
-		ShowCommandHelp(ctx, c.Name)
+		ShowCommandHelp(ctx, name)
 		fmt.Println()
 		return errors.New("insufficient args")
 	}

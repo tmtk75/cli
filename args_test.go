@@ -288,3 +288,39 @@ func TestValidArgsWithFlags(t *testing.T) {
 		}
 	}()
 }
+
+func TestAppAction(t *testing.T) {
+	app := NewApp()
+	var id, path, name string
+	var a, b bool
+	app.Args = "<id> [path] [name]"
+	app.Action = func(c *Context) {
+		id, _ = c.ArgFor("id")
+		path, a = c.ArgFor("path")
+		name, b = c.ArgFor("name")
+	}
+	app.Run([]string{"", "1234", "/tmp"})
+
+	if !(id == "1234") {
+		t.Errorf("expect id is 1234: %v", id)
+	}
+	if !(path == "/tmp") {
+		t.Errorf("expect path is /tmp: %v", path)
+	}
+	if !(name == "") {
+		t.Errorf("expect name is empty: %v", name)
+	}
+	if !(a == true) {
+		t.Errorf("expect a is true: %v", a)
+	}
+	if !(b == false) {
+		t.Errorf("expect b is false: %v", b)
+	}
+
+	app = NewApp()
+	app.Args = "<id>"
+	err := app.Run([]string{""})
+	if !(err != nil && fmt.Sprintln(err) == "insufficient args\n") {
+		t.Errorf("expect err: %v", err)
+	}
+}

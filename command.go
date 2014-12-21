@@ -92,7 +92,7 @@ func (c Command) Run(ctx *Context) error {
 	}
 	context := NewContext(ctx.App, set, ctx.globalSet)
 
-	if err := checkArgs(&c, context); err != nil {
+	if err := checkArgs(c.Args, c.Name, context); err != nil {
 		return err
 	}
 
