@@ -1,4 +1,4 @@
-module tmtk75/cli
+module github.com/tmtk75/cli
 
 go 1.18
 
